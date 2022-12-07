@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Lang.LangCore;
 
 namespace Lang.LangTool;
 
@@ -15,6 +15,7 @@ public static class Program{
         using (FileStream fs = new FileStream(args[0], FileMode.Open))
         {
             System.Console.WriteLine("Opened File");
+            Parser.Parse(Lexer.Parse(fs));
         }
 
         return 0;
