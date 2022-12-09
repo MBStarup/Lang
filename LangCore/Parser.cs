@@ -23,7 +23,6 @@ public static class Parser
                     result.Type = "Int";
                     result.Identifier = curr.Value;
                     System.Console.WriteLine("END ASSIGN NUMBER");
-
                 } else if (curr.Type == "{") { //* Case: assign to expression value
                     System.Console.WriteLine("START ASSIGN {}");
                     var values = new List<Expression>();
@@ -33,6 +32,10 @@ public static class Parser
                     }
                     result.Values = values.ToArray();
                     System.Console.WriteLine("START ASSIGN {}");
+                } else if (curr.Type == ";") { //* Case func
+                    System.Console.WriteLine("START ASSIGN ;");
+                    
+                    System.Console.WriteLine("END ASSIGN ;");
                 }
             } else if (prev.Type == "") { //* First round
                 System.Console.WriteLine("FIRST");
