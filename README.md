@@ -16,11 +16,9 @@ Lang lang
     print(a + doMath(b 10) * func(1 3))
 
 --------------------------------------------------
-    ("OPERATOR", "#")
     ("SYMBOL", "a")
     (":", "")
     ("NUMBER", "10")
-    ("OPERATOR", "#")
     ("SYMBOL", "b")
     (":", "")
     ("{", "")
@@ -33,7 +31,6 @@ Lang lang
     ("OPERATOR", "+")
     ("NUMBER", "4")
     ("}", "")
-    ("OPERATOR", "#")
     ("SYMBOL", "doMath")
     (":", "")
     (";", "")
@@ -49,7 +46,6 @@ Lang lang
     ("OPERATOR", "*")
     ("SYMBOL", "b")
     ("}", "")
-    ("OPERATOR", "#")
     ("SYMBOL", "func")
     (":", "")
     (";", "")

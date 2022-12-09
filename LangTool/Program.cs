@@ -14,11 +14,22 @@ public static class Program{
 
         using (FileStream fs = new FileStream(args[0], FileMode.Open))
         {
-            System.Console.WriteLine("Opened File");
-            Parser.Parse(Lexer.Parse(fs));
+            System.Console.WriteLine("-------------------------------");
+            System.Console.WriteLine("\nOpened File\n");
+            var lexRes = Lexer.Parse(fs);
+            System.Console.WriteLine("\nFinieshed Lexer parsing\n");
+            lexRes.Foreach(x => x.Print());
+            System.Console.WriteLine("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
+            var parseRes = Parser.Parse(lexRes, ("", ""));
+            System.Console.WriteLine("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
+            System.Console.WriteLine("\nFinieshed Parser parsing\n");
+            parseRes.Print();
         }
 
         return 0;
     }
 
+    public static void Foreach<T>(this IEnumerable<T> list, Action<T> action) {
+        foreach (var item in list) {action(item);}
+    }
 }

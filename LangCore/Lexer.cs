@@ -13,10 +13,9 @@ public static class Lexer
     public static string Colon = ":";
     public static string SemiColon = ";";
 
-    public static Stack<(string type, string value)> Parse(FileStream file) {
+    public static Queue<Token> Parse(FileStream file) {
 
-        Stack<(string type, string value)> stack = new();
-        
+        Queue<Token> queue = new();
         using (var reader = new StreamReader(file)) {
             
             char c;
@@ -35,8 +34,7 @@ public static class Lexer
                             symbol += reader.ReadC();
                             //TODO: Catch file ends early
                         }
-                        stack.Push(("SYMBOL", symbol));
-                        System.Console.WriteLine($"(\"SYMBOL\", \"{symbol}\")");
+                        queue.Enqueue(("SYMBOL", symbol));
                         break;
                     } else if (Digits.Contains(c)) {
                         // System.Console.WriteLine(" Digit ");
@@ -46,48 +44,39 @@ public static class Lexer
                             //TODO: Catch file ends early
                             //TODO: Floats
                         }
-                        stack.Push(("NUMBER", number));
-                        System.Console.WriteLine($"(\"NUMBER\", \"{number}\")");
+                        queue.Enqueue(("NUMBER", number));
                         break;
                     } else if (Operators.Contains(c)) {
                         // System.Console.WriteLine(" Operator ");
-                        stack.Push(("OPERATOR", c.ToString()));
-                        System.Console.WriteLine($"(\"OPERATOR\", \"{c}\")");
+                        queue.Enqueue(("OPERATOR", c.ToString()));
                         break;
                     } else if (OpenBracket.Contains(c)) {
                         // System.Console.WriteLine(" O_Bracket ");
-                        stack.Push(("(", ""));
-                        System.Console.WriteLine($"(\"(\", \"\")");
+                        queue.Enqueue(("(", ""));
                         break;
                     } else if (CloseBracket.Contains(c)) {
                         // System.Console.WriteLine(" C_Bracket ");
-                        stack.Push((")", ""));
-                        System.Console.WriteLine($"(\")\", \"\")");
+                        queue.Enqueue((")", ""));
                         break;
                     } else if (Comma.Contains(c)) {
                         // System.Console.WriteLine(" Comma ");
-                        stack.Push((",", ""));
-                        System.Console.WriteLine($"(\",\", \"\")");
+                        queue.Enqueue((",", ""));
                         break;
                     } else if (Colon.Contains(c)) {
                         // System.Console.WriteLine(" Colon ");
-                        stack.Push((":", ""));
-                        System.Console.WriteLine($"(\":\", \"\")");
+                        queue.Enqueue((":", ""));
                         break;
                     } else if (SemiColon.Contains(c)) {
                         // System.Console.WriteLine(" SemiColon ");
-                        stack.Push((";", ""));
-                        System.Console.WriteLine($"(\";\", \"\")");
+                        queue.Enqueue((";", ""));
                         break;
                     } else if (OpenCurlyBracket.Contains(c)) {
                         // System.Console.WriteLine(" O_Bracket ");
-                        stack.Push(("{", ""));
-                        System.Console.WriteLine($"(\"{{\", \"\")");
+                        queue.Enqueue(("{", ""));
                         break;
                     } else if (CloseCurlyBracket.Contains(c)) {
                         // System.Console.WriteLine(" C_Bracket ");
-                        stack.Push(("}", ""));
-                        System.Console.WriteLine($"(\"}}\", \"\")");
+                        queue.Enqueue(("}", ""));
                         break;
                     } else {
                         throw new Exception($"Could not parse letter \'{c}\' ({(int)c}), sorry");
@@ -95,7 +84,7 @@ public static class Lexer
                 }
             }
         }
-        return stack;
+        return queue;
     }
 
     private static char ReadC(this StreamReader reader) {
@@ -103,6 +92,16 @@ public static class Lexer
     }
         private static char PeekC(this StreamReader reader) {
         return (char)reader.Peek();
+    }
+}
+
+public class Token {
+    public string Type;
+    public string Value;
+    public static implicit operator Token ((string, string) x) => new Token(){ Type = x.Item1, Value = x.Item2 };
+
+    public void Print() {
+        System.Console.WriteLine(($"(\"{Type}\", \"{Value}\")"));
     }
 }
 
