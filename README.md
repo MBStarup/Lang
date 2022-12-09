@@ -183,39 +183,6 @@ Lang lang
         )
     )
     (
-        "Assign", 
-        "func", 
-        (
-            "Func", 
-            [
-                "x", 
-                "y"
-            ], 
-            [
-                (
-                    "Assign", 
-                    "zoom", 
-                    (
-                        "BiExpr", 
-                        "*", 
-                        (
-                            "Int", 
-                            "7"
-                        ), 
-                        "y"
-                    )
-                ), 
-                (
-                    "BiExpr"
-                    "+", 
-                    "x", 
-                    "zoom"
-                ), 
-            ]
-            )
-        )
-    )
-    (
         "Call", 
         "print", 
         [
