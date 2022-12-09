@@ -19,5 +19,5 @@ public static class Parser
 public class Expression {
     public string Type;
     public string Identifier;
-    public Expression Value;
+    public Expression[] Values;
 }

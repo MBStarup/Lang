@@ -1,4 +1,11 @@
-#a:10
-#b:20
-#doMath(a b): { (a - b) * b}
-print(a + doMath(b 10) * 2)
+    #a:10
+    #b: {
+        a: 2*a
+        a+ 4
+    }
+    #doMath: ;a b; { (a - b) * b}
+    #func: ;x y; {
+        #zoom: 7 * y
+        x + zoom
+    }
+    print(a + doMath(b 10) * func(1 3))
