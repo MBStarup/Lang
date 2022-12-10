@@ -1,13 +1,19 @@
     {
-        a:10
-        b: {
-            a: 2*a
-            a+ 4
+        # Prints "Hello world" followed by a newline #
+        Greet: ;; {
+            print(72)   # H #
+            print(101)  # e #
+            print(108)  # l #
+            print(108)  # l #
+            print(111)  # o #
+            print(32)   #   #
+            print(119)  # w #
+            print(111)  # o #
+            print(114)  # r #
+            print(108)  # l #
+            print(100)  # d #
+            print(10)   # \n #
         }
-        doMath: ;a b; { b * a - b}
-        func: ;x y; {
-            zoom: 7 * y
-            x + zoom
-        }
-        print(a + doMath(b 10) * func(1 3))
+
+        Greet()
     }

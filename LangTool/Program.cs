@@ -1,4 +1,5 @@
-﻿using Lang.LangCore;
+﻿using System.Text;
+using Lang.LangCore;
 
 namespace Lang.LangTool;
 
@@ -25,12 +26,14 @@ public static class Program{
             var globalScope = new DiveableDictStack<string, Item>();
             globalScope.Stack();
 
+            //* Magic functions provided to the language by the interpreter
+
             globalScope.Insert("print", new Item() { 
                 Type = typeof(LangFunc), 
                 Value = new LangFunc () {
                     ArgNames = new() {"x"}, 
                     Func = (DiveableDictStack<string, Item> s) => {
-                        System.Console.WriteLine(s.Seek("x"));
+                        System.Console.Write(Encoding.ASCII.GetString(new byte[] { (byte)(int)s.Seek("x").Value }));
                         return new Item() { Type = typeof(int), Value = 1 };
                     }
                 }
@@ -49,8 +52,12 @@ public static class Program{
                 }
             });
 
+            //* End of magic functions provided to the language by the interpreter
+
             System.Console.WriteLine("\n-----WELCOME-----\n");
-            System.Console.WriteLine(Interpreter.Run(parseRes, globalScope));
+            var exitCode = (int)Interpreter.Run(parseRes, globalScope).Value;
+            System.Console.WriteLine("\n-------END-------\n");
+            System.Console.WriteLine($"\n\nProgram finsished with exit code: {exitCode}");
         }
 
         return 0;
