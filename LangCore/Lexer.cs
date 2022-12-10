@@ -2,9 +2,9 @@
 public static class Lexer
 {
     public static string Empty = " \n\r\t";
-    public static string Letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public static string Letters = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public static string Digits = "1234567890";
-    public static string Operators = "#+-*/=";
+    public static string Operators = "+-*/=";
     public static string OpenBracket = "(";
     public static string CloseBracket = ")";
     public static string OpenCurlyBracket = "{";
@@ -12,6 +12,7 @@ public static class Lexer
     public static string Comma = ",";
     public static string Colon = ":";
     public static string SemiColon = ";";
+    public static string HashTag = "#";
 
     public static Queue<Token> Parse(FileStream file) {
 
@@ -45,6 +46,14 @@ public static class Lexer
                             //TODO: Floats
                         }
                         queue.Enqueue(("NUMBER", number));
+                        break;
+                    } else if (HashTag.Contains(c)) {
+                        string comment = c.ToString();
+                        while(!HashTag.Contains(reader.PeekC())) {
+                            comment += reader.ReadC();
+                        }
+                        comment += reader.ReadC();
+                        System.Console.WriteLine($" Comment: {comment} ");
                         break;
                     } else if (Operators.Contains(c)) {
                         // System.Console.WriteLine(" Operator ");
