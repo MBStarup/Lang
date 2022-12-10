@@ -1,4 +1,11 @@
     {
+        # My giga scuffed standard library LULE #
+        _:;x;{x} # identity function since we can't use parenthesis in expressions #
+        printDigit: ;num; print(48+num)
+        if: ;bool action; bool & action()
+        !: ;bool; bool < 1
+        # stdlib end #
+
         # Prints "Hello world" followed by a newline #
         Greet: ;; {
             print(72)   # H #
