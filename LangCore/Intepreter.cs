@@ -46,7 +46,7 @@ public static class Interpreter
                 {
                     var function = scope.Seek(expression.Identifiers[0]);
                     if (function == null) throw new Exception($"Symbol with identifier {expression.Identifiers[0]} could not be found.");
-                    if (function.Type != typeof(LangFunc)) throw new Exception("Can only call functions");
+                    if (function.Type != typeof(LangFunc)) throw new Exception($"Can only call functions, tried to call {expression.Identifiers[0]}, which is a {function.Type}.");
                     var langFunc = (LangFunc)function.Value;
                     
                     
@@ -125,6 +125,42 @@ public static class Interpreter
                             if (a.Type != typeof(int)) throw new Exception($"Argument 1 of operator {expression.Identifiers[0]} must evaluate to a number");
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
                             return new Item(){Type = typeof(int), Value = (int)a.Value / (int)b.Value};
+                        }
+                        break;
+
+                    case ">":
+                        {
+                            if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
+                            var a = Run(expression.Values[0], scope);
+                            var b = Run(expression.Values[1], scope);
+
+                            if (a.Type != typeof(int)) throw new Exception($"Argument 1 of operator {expression.Identifiers[0]} must evaluate to a number");
+                            if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
+                            return new Item(){Type = typeof(int), Value = (int)a.Value > (int)b.Value ? 1 : 0};
+                        }
+                        break;
+
+                    case "<":
+                        {
+                            if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
+                            var a = Run(expression.Values[0], scope);
+                            var b = Run(expression.Values[1], scope);
+
+                            if (a.Type != typeof(int)) throw new Exception($"Argument 1 of operator {expression.Identifiers[0]} must evaluate to a number");
+                            if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
+                            return new Item(){Type = typeof(int), Value = (int)a.Value < (int)b.Value ? 1 : 0};
+                        }
+                        break;
+
+                    case "=":
+                        {
+                            if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
+                            var a = Run(expression.Values[0], scope);
+                            var b = Run(expression.Values[1], scope);
+
+                            if (a.Type != typeof(int)) throw new Exception($"Argument 1 of operator {expression.Identifiers[0]} must evaluate to a number");
+                            if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
+                            return new Item(){Type = typeof(int), Value = (int)a.Value == (int)b.Value ? 1 : 0};
                         }
                         break;
 

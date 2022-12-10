@@ -4,7 +4,7 @@ public static class Lexer
     public static string Empty = " \n\r\t";
     public static string Letters = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public static string Digits = "1234567890";
-    public static string Operators = "+-*/=";
+    public static string Operators = "+-*/=<>";
     public static string OpenBracket = "(";
     public static string CloseBracket = ")";
     public static string OpenCurlyBracket = "{";

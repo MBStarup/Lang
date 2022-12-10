@@ -42,9 +42,9 @@ public static class Program{
             globalScope.Insert("if", new Item() { 
                 Type = typeof(LangFunc), 
                 Value = new LangFunc () {
-                    ArgNames = new() {"predicate", "function"}, 
+                    ArgNames = new() {"bool", "function"}, 
                     Func = (DiveableDictStack<string, Item> s) => {
-                        if ((int)s.Seek("predicate").Value == 1) {
+                        if ((int)s.Seek("bool").Value == 1) {
                             return ((LangFunc)s.Seek("function").Value).Func.Invoke(s);
                         }
                         return new Item() { Type = typeof(int), Value = 0 };
