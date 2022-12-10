@@ -7,7 +7,17 @@ public static class Interpreter
         {
             case "Func": 
                 {
-                    return new() { Type = typeof(LangFunc), Value = new LangFunc() {ArgNames = expression.Identifiers, Func = scp => Run(expression.Values[0], scp)}};
+                    Item rsult = new() 
+                    { 
+                        Type = typeof(LangFunc), 
+                        Value = new LangFunc() 
+                        {
+                            ArgNames = expression.Identifiers, 
+                            Func = scp => Run(expression.Values[0], scp), 
+                            Scope = scope.Copy<string, Item>()
+                        }
+                    };
+                    return rsult;
                 }
                 break;
 
@@ -15,6 +25,10 @@ public static class Interpreter
                 {
                     if (expression.Values.Count != 1) throw new Exception($"Assignment expected one expression, found {expression.Values.Count}");
                     Item item = Run(expression.Values[0], scope);
+                    if (item.Type == typeof(LangFunc)) {
+                        (item.Value as LangFunc).Scope.Insert(expression.Identifiers[0], item); // Recursion
+                        (item.Value as LangFunc).Name = expression.Identifiers[0];
+                    }
                     scope.Insert(expression.Identifiers[0], item);
                     return item; //* Assigments evaluate to their assigned value
                 }
@@ -53,27 +67,29 @@ public static class Interpreter
                     if (expression.Values.Count != langFunc.ArgNames.Count) throw new Exception($"Function {expression.Identifiers[0]} expected {langFunc.ArgNames.Count} arguments, but got {expression.Values.Count}");
                     
 
-                    scope.Stack(); //* Add a new scope for the function, and insert the arguments
+                    langFunc.Scope.Stack(); //* Add a new scope for the function arguments, and insert the arguments
                     for (int i = 0; i < langFunc.ArgNames.Count; i++)
                     {
-                        scope.Insert(langFunc.ArgNames[i], Run(expression.Values[i], scope) );
+                        langFunc.Scope.Insert(langFunc.ArgNames[i], Run(expression.Values[i], scope) );
                     }
-                    var val = langFunc.Func.Invoke(scope); //* Evaluate the function call
-                    scope.Pop(); //* Remove function from scope before return
+                    var val = langFunc.Func.Invoke(langFunc.Scope); //* Evaluate the function call
+                    langFunc.Scope.Pop(); //* Remove function arguments scope before return
                     return val;
                 }
                 break;
             
             case "MultiExpr":
-                if (expression.Values.Count < 1) throw new Exception($"Empty MultiExpr");
-                scope.Stack();
-                var final = Run(expression.Values[0], scope);
-                for (int i = 1; i < expression.Values.Count; i++)
                 {
-                    final = Run(expression.Values[i], scope);
+                    if (expression.Values.Count < 1) throw new Exception($"Empty MultiExpr");
+                    scope.Stack();
+                    var final = Run(expression.Values[0], scope);
+                    for (int i = 1; i < expression.Values.Count; i++)
+                    {
+                        final = Run(expression.Values[i], scope);
+                    }
+                    scope.Pop();
+                    return final;
                 }
-                scope.Pop();
-                return final;
                 break;
 
             case "BiExpr":
@@ -190,6 +206,8 @@ public class Item
 
 public class LangFunc 
 {
+    public string Name = "anon";
+    public DiveableDictStack<string, Item> Scope;
     public Func<DiveableDictStack<string, Item>, Item> Func;
     public List<string> ArgNames;
 }
@@ -216,5 +234,26 @@ public class DiveableDictStack<TKey, TValue> where TKey : notnull
 
     public void Insert(TKey key, TValue value) {
         stack.Peek()[key] = value;
+    }
+
+    public DiveableDictStack<TKey, TValue> Copy<TKey, TValue>() where TKey : notnull 
+    {
+         DiveableDictStack<TKey, TValue> result = new DiveableDictStack<TKey, TValue>();
+         Stack<Dictionary<TKey, TValue>> reverseStack = new Stack<Dictionary<TKey, TValue>>();
+         foreach (var dictionary in stack)
+         {
+            reverseStack.Push((Dictionary<TKey, TValue>)(object)dictionary); // TODO: somethign less stupid that this LULE
+         }
+
+         foreach (var dictionary in reverseStack)
+         {
+            result.Stack();
+            foreach (var item in dictionary)
+            {
+                result.Insert(item.Key, item.Value);
+            }
+         }
+
+         return result;
     }
 }

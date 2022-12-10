@@ -31,6 +31,8 @@ public static class Program{
             globalScope.Insert("print", new Item() { 
                 Type = typeof(LangFunc), 
                 Value = new LangFunc () {
+                    Scope = globalScope,
+                    Name = "print_func",
                     ArgNames = new() {"x"}, 
                     Func = (DiveableDictStack<string, Item> s) => {
                         System.Console.Write(Encoding.ASCII.GetString(new byte[] { (byte)(int)s.Seek("x").Value }));
@@ -42,10 +44,13 @@ public static class Program{
             globalScope.Insert("if", new Item() { 
                 Type = typeof(LangFunc), 
                 Value = new LangFunc () {
+                    Scope = globalScope,
+                    Name = "if_func",
                     ArgNames = new() {"bool", "function"}, 
                     Func = (DiveableDictStack<string, Item> s) => {
                         if ((int)s.Seek("bool").Value == 1) {
-                            return ((LangFunc)s.Seek("function").Value).Func.Invoke(s);
+                            var func = (LangFunc)s.Seek("function").Value;
+                            return func.Func.Invoke(func.Scope);
                         }
                         return new Item() { Type = typeof(int), Value = 0 };
                     }
