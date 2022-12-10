@@ -24,7 +24,32 @@ public static class Program{
             parseRes.Print();
             var globalScope = new DiveableDictStack<string, Item>();
             globalScope.Stack();
-            // TODO: Add cool shit to global
+
+            globalScope.Insert("print", new Item() { 
+                Type = typeof(LangFunc), 
+                Value = new LangFunc () {
+                    ArgNames = new() {"x"}, 
+                    Func = (DiveableDictStack<string, Item> s) => {
+                        System.Console.WriteLine(s.Seek("x"));
+                        return new Item() { Type = typeof(int), Value = 1 };
+                    }
+                }
+            });
+
+            globalScope.Insert("if", new Item() { 
+                Type = typeof(LangFunc), 
+                Value = new LangFunc () {
+                    ArgNames = new() {"predicate", "function"}, 
+                    Func = (DiveableDictStack<string, Item> s) => {
+                        if ((int)s.Seek("predicate").Value == 1) {
+                            return ((LangFunc)s.Seek("function").Value).Func.Invoke(s);
+                        }
+                        return new Item() { Type = typeof(int), Value = 0 };
+                    }
+                }
+            });
+
+            System.Console.WriteLine("\n-----WELCOME-----\n");
             System.Console.WriteLine(Interpreter.Run(parseRes, globalScope));
         }
 

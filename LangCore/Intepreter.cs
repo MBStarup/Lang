@@ -7,7 +7,7 @@ public static class Interpreter
         {
             case "Func": 
                 {
-                    return new() { Type = typeof(FuncData), Value = new FuncData() {ArgNames = expression.Identifiers, Value = expression.Values[0]}};
+                    return new() { Type = typeof(LangFunc), Value = new LangFunc() {ArgNames = expression.Identifiers, Func = scp => Run(expression.Values[0], scp)}};
                 }
                 break;
 
@@ -46,19 +46,21 @@ public static class Interpreter
                 {
                     var function = scope.Seek(expression.Identifiers[0]);
                     if (function == null) throw new Exception($"Symbol with identifier {expression.Identifiers[0]} could not be found.");
-                    if (function.Type != typeof(FuncData)) throw new Exception("Can only call functions");
-                    var func = (FuncData)function.Value;
-                    if (expression.Values.Count != func.ArgNames.Count) throw new Exception($"Function {expression.Identifiers[0]} expected {func.ArgNames.Count} arguments, but got {expression.Values.Count}");
+                    if (function.Type != typeof(LangFunc)) throw new Exception("Can only call functions");
+                    var langFunc = (LangFunc)function.Value;
                     
+                    
+                    if (expression.Values.Count != langFunc.ArgNames.Count) throw new Exception($"Function {expression.Identifiers[0]} expected {langFunc.ArgNames.Count} arguments, but got {expression.Values.Count}");
+                    
+
                     scope.Stack(); //* Add a new scope for the function, and insert the arguments
-                    for (int i = 0; i < func.ArgNames.Count; i++)
+                    for (int i = 0; i < langFunc.ArgNames.Count; i++)
                     {
-                        scope.Insert(func.ArgNames[i], Run(expression.Values[i], scope) );
+                        scope.Insert(langFunc.ArgNames[i], Run(expression.Values[i], scope) );
                     }
-                    var val = Run(func.Value, scope); //* Evaluate the function call
+                    var val = langFunc.Func.Invoke(scope); //* Evaluate the function call
                     scope.Pop(); //* Remove function from scope before return
                     return val;
-                    
                 }
                 break;
             
@@ -150,12 +152,11 @@ public class Item
     }         
 }
 
-public class FuncData
+public class LangFunc 
 {
+    public Func<DiveableDictStack<string, Item>, Item> Func;
     public List<string> ArgNames;
-    public Expression Value;
 }
-
 public class DiveableDictStack<TKey, TValue> where TKey : notnull
 {
     Stack<Dictionary<TKey, TValue>> stack = new();

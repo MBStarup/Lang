@@ -1,13 +1,8 @@
     {
-        a:10
-        b: {
-            a: 2*a
-            a+ 4
-        }
-        doMath: ;a b; { c: a*b c-b}
-        func: ;x y; {
-            zoom: 7 * y
-            x + zoom
-        }
-        a + doMath(b 10) * func(1 3)
+        a: 0
+        if(a ;;{ 
+                print(3) 
+        })
+        print(4)
+        0
     }
