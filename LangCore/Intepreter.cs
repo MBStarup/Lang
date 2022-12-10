@@ -39,7 +39,6 @@ public static class Interpreter
                         throw new Exception($"Value {expression.Identifiers[0]} could not be parses as an int.");
                     }
                 }
-                break;
             
             case "Symbol":
                 {
@@ -96,7 +95,6 @@ public static class Interpreter
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
                             return new Item(){Type = typeof(int), Value = (int)a.Value + (int)b.Value};
                         }
-                        break;
 
                     case "-":
                         {
@@ -108,7 +106,6 @@ public static class Interpreter
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
                             return new Item(){Type = typeof(int), Value = (int)a.Value - (int)b.Value};
                         }
-                        break;
 
                     case "*":
                         {
@@ -120,8 +117,6 @@ public static class Interpreter
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
                             return new Item(){Type = typeof(int), Value = (int)a.Value * (int)b.Value};
                         }
-                        break;
-
                     
                     case "/":
                         {
@@ -133,7 +128,6 @@ public static class Interpreter
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
                             return new Item(){Type = typeof(int), Value = (int)a.Value / (int)b.Value};
                         }
-                        break;
 
                     case ">":
                         {
@@ -145,7 +139,6 @@ public static class Interpreter
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
                             return new Item(){Type = typeof(int), Value = (int)a.Value > (int)b.Value ? 1 : 0};
                         }
-                        break;
 
                     case "<":
                         {
@@ -157,7 +150,6 @@ public static class Interpreter
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
                             return new Item(){Type = typeof(int), Value = (int)a.Value < (int)b.Value ? 1 : 0};
                         }
-                        break;
 
                     case "=":
                         {
@@ -169,11 +161,9 @@ public static class Interpreter
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
                             return new Item(){Type = typeof(int), Value = (int)a.Value == (int)b.Value ? 1 : 0};
                         }
-                        break;
 
                     default:
                         throw new Exception($"Unknown operator {expression.Identifiers[0]}");
-                        break;
                 }
 
             default:
