@@ -17,12 +17,10 @@ public static class Program{
             System.Console.WriteLine("-------------------------------");
             System.Console.WriteLine("\nOpened File\n");
             var lexRes = Lexer.Parse(fs);
-            System.Console.WriteLine("\nFinieshed Lexer parsing\n");
+            System.Console.WriteLine("\nFinieshed Lexer parsing\nResult:\n");
             lexRes.Foreach(x => x.Print());
-            System.Console.WriteLine("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-            var parseRes = Parser.Parse(lexRes, ("", ""));
-            System.Console.WriteLine("\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-            System.Console.WriteLine("\nFinieshed Parser parsing\n");
+            var parseRes = Parser.Parse(lexRes);
+            System.Console.WriteLine("\nFinieshed Parser parsing\nResult:\n");
             parseRes.Print();
         }
 

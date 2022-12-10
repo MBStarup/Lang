@@ -101,7 +101,12 @@ public class Token {
     public static implicit operator Token ((string, string) x) => new Token(){ Type = x.Item1, Value = x.Item2 };
 
     public void Print() {
-        System.Console.WriteLine(($"(\"{Type}\", \"{Value}\")"));
+        System.Console.WriteLine(this);
+    }
+
+    public override string ToString()
+    {
+        return $"(\"{Type}\", \"{Value}\")";
     }
 }
 

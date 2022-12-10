@@ -1,71 +1,176 @@
 namespace Lang.LangCore;
 public static class Parser
 {
-     public static Expression Parse(Queue<Token> tokens, Token prev) {
+     public static Expression Parse(Queue<Token> tokens) {
+
         Expression result = new();
-        while (tokens.Count > 0) {
+        if (tokens.Count > 0) {
+            var token = tokens.Dequeue();
 
-            var curr = tokens.Dequeue();
+            if (token.Type == "SYMBOL"){
+                
+                var symbol = token.Value;
 
-            if (prev.Type == "SYMBOL"){
-
-                if (curr.Type == ":"){ //* Case: assignment
-                    System.Console.WriteLine("START ASSIGN");
+                if (tokens.Count > 0 && tokens.Peek().Type == ":"){ //* Case: assignment
+                
+                    token = tokens.Dequeue();
                     result.Type = "Assign";
-                    result.Identifier = prev.Value;
-                    result.Values = new[] { Parse(tokens, curr) };
-                    System.Console.WriteLine("END ASSIGN");
-                }
-            } else if (prev.Type == ":") {
-                // TODO: check if the next one is a math operator
-                if (curr.Type == "NUMBER") { //* Case: assign to int literal
-                    System.Console.WriteLine("START ASSIGN NUMBER");
-                    result.Type = "Int";
-                    result.Identifier = curr.Value;
-                    System.Console.WriteLine("END ASSIGN NUMBER");
-                } else if (curr.Type == "{") { //* Case: assign to expression value
-                    System.Console.WriteLine("START ASSIGN {}");
-                    var values = new List<Expression>();
-                    while (curr.Type != "}") {
-                        values.Add(Parse(tokens, curr));
-                        curr = tokens.Dequeue();
+                    result.Identifiers = new() { symbol };
+                    result.Values = new() { Parse(tokens) }; //* One statement assignment only
+                    return result;
+                
+                } else if (tokens.Count > 0 && tokens.Peek().Type == "OPERATOR") {
+
+                    token = tokens.Dequeue();
+                    result.Type = "BiExpr";
+                    result.Identifiers = new() { token.Value };
+                    result.Values = new() { new Expression() {Type = "Symbol", Identifiers = new() { symbol } }, Parse(tokens) }; //* No operator preceedence
+                    return result;
+                
+                } else if (tokens.Count > 0 && tokens.Peek().Type == "(") {
+                
+                    token = tokens.Dequeue();
+                    result.Type = "Call";
+                    result.Identifiers = new() { symbol };
+                    result.Values = new();
+                    while (tokens.Count > 0 && tokens.Peek().Type != ")") {
+                        result.Values.Add(Parse(tokens)); 
                     }
-                    result.Values = values.ToArray();
-                    System.Console.WriteLine("START ASSIGN {}");
-                } else if (curr.Type == ";") { //* Case func
-                    System.Console.WriteLine("START ASSIGN ;");
+                    token = tokens.Dequeue(); //* Remove the ")"
+
+                    if (tokens.Count > 0 && tokens.Peek().Type == "OPERATOR") {
                     
-                    System.Console.WriteLine("END ASSIGN ;");
+                        Expression opResult = new();
+                        token = tokens.Dequeue();
+                        opResult.Type = "BiExpr";
+                        opResult.Identifiers = new() { token.Value };
+                        opResult.Values = new() { result, Parse(tokens) }; //* No operator preceedence
+                        return opResult;
+                    }
+
+
+
+                    return result;
+                
+                } else {
+                
+                    return new Expression() {Type = "Symbol", Identifiers = new() { symbol } }; 
+
                 }
-            } else if (prev.Type == "") { //* First round
-                System.Console.WriteLine("FIRST");
-                result = Parse(tokens, curr);
-                System.Console.WriteLine("END");
+            
+            } else if (token.Type == "NUMBER") { //* Case: assign to int literal
+      
+                var number = token.Value;
+
+                if (tokens.Count > 0 && tokens.Peek().Type == "OPERATOR") {
+
+                    token = tokens.Dequeue();
+                    result.Type = "BiExpr";
+                    result.Identifiers = new() { token.Value };
+                    result.Values = new() { new Expression() {Type = "Int", Identifiers = new() { number } }, Parse(tokens) }; //* No operator preceedence
+                    return result;
+                
+                } else {
+                
+                    return new Expression() {Type = "Int", Identifiers = new() { number } }; 
+                                    
+                }
+            
+            // } else if (token.Type == "(") { //* Case: expression
+
+            //     while (tokens.Peek() != ")") {
+
+            //     }
+
+                // if (tokens.Count > 0 && tokens.Peek().Type == "OPERATOR") {
+                    
+                //     Expression opResult = new();
+                //     token = tokens.Dequeue();
+                //     opResult.Type = "BiExpr";
+                //     opResult.Identifiers = new() { token.Value };
+                //     opResult.Values = new() { result, Parse(tokens) }; //* No operator preceedence
+                //     return opResult;
+                // }
+
+            
+            } else if (token.Type == "{") { //* Case: multi expression
+            
+                result.Type = "MultiExpr";
+                result.Values = new();
+                while (tokens.Count > 0 && tokens.Peek().Type != "}") {
+                    result.Values.Add(Parse(tokens));
+                }
+                tokens.Dequeue(); //* Remove the "}"
+
+                if (tokens.Count > 0 && tokens.Peek().Type == "OPERATOR") {
+                    
+                    Expression opResult = new();
+                    token = tokens.Dequeue();
+                    opResult.Type = "BiExpr";
+                    opResult.Identifiers = new() { token.Value };
+                    opResult.Values = new() { result, Parse(tokens) }; //* No operator preceedence
+                    return opResult;
+                }
+
+                return result;
+
+            } else if (token.Type == ";") { //* Case: Function
+
+                result.Type = "Func";
+                result.Identifiers = new();
+                while (tokens.Count > 0 && tokens.Peek().Type != ";") {
+                    var next = Parse(tokens);
+                    
+                    if (next.Type != "Symbol") throw new Exception("Function params must be symbols");
+                    if (next.Identifiers.Count != 1) throw new Exception("Symbols must have exactly one identidier");
+                    
+                    result.Identifiers.Add(next.Identifiers[0]);
+                }
+                tokens.Dequeue(); //* Remove the ";"
+
+                result.Values = new() { Parse(tokens) };
+
+                return result;
+
             } else {
-                throw new Exception("BIG ERROR #1");
+
+                throw new Exception($"Unexpected token : (\"{token.Type}\", \"{token.Value}\") encountered!");
+            
             }
-            return result;
         }
-        throw new Exception("BIG ERROR #2");
+        else {
+            throw new Exception($"Ran out of tokens");
+        }
+        throw new Exception($"Missing return");
      } 
 } 
 
 
 public class Expression {
     public string Type;
-    public string Identifier;
-    public Expression[] Values;
+    public List<string> Identifiers;
+    public List<Expression> Values;
 
     public void Print(int indentAmount = 0)
     {
         var indent = new string(' ', indentAmount);
+        
         System.Console.WriteLine($"{indent}(");
-        System.Console.WriteLine($"{indent}\"{Type}\",");
-        System.Console.WriteLine($"{indent}\"{Identifier}\",");
-        for (int i = 0; i < Values?.Length; i++)
-        {
+        System.Console.WriteLine($"{indent}Type: \"{Type}\",");
+        
+        for (int i = 0; i < Identifiers?.Count; i++) {
+            System.Console.WriteLine($"{indent}Identifier: \"{Identifiers[i]}\",");
+        }
+
+        for (int i = 0; i < Values?.Count; i++) {
             Values[i].Print(indentAmount + 2);
         }
+        
         System.Console.WriteLine($"{indent})");
+    }
+
+    public override string ToString()
+    {
+        return Type;
     }
 }
