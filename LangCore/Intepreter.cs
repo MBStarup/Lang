@@ -161,6 +161,18 @@ public static class Interpreter
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
                             return new Item(){Type = typeof(int), Value = (int)a.Value == (int)b.Value ? 1 : 0};
                         }
+                    
+                    case "&":
+                        {
+                            if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
+                            return new Item(){Type = typeof(int), Value = ((int)(Run(expression.Values[0], scope)).Value == 1) && ((int)(Run(expression.Values[1], scope)).Value == 1) ? 1 : 0}; //* Automatically has shortcircuit eval since c# does
+                        }
+                    
+                    case "|":
+                        {
+                            if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
+                            return new Item(){Type = typeof(int), Value = ((int)(Run(expression.Values[0], scope)).Value == 1) || ((int)(Run(expression.Values[1], scope)).Value == 1) ? 1 : 0}; //* Automatically has shortcircuit eval since c# does
+                        }
 
                     default:
                         throw new Exception($"Unknown operator {expression.Identifiers[0]}");

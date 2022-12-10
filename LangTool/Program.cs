@@ -40,21 +40,6 @@ public static class Program{
                 }
             });
 
-            globalScope.Insert("if", new Item() { 
-                Type = typeof(LangFunc), 
-                Value = new LangFunc () {
-                    Scope = globalScope,
-                    ArgNames = new() {"bool", "function"}, 
-                    Func = (DiveableDictStack<string, Item> s) => {
-                        if ((int)s.Seek("bool").Value == 1) {
-                            var func = (LangFunc)s.Seek("function").Value;
-                            return func.Func.Invoke(func.Scope);
-                        }
-                        return new Item() { Type = typeof(int), Value = 0 };
-                    }
-                }
-            });
-
             //* End of magic functions provided to the language by the interpreter
 
             System.Console.WriteLine("\n-----WELCOME-----\n");
