@@ -22,6 +22,10 @@ public static class Program{
             var parseRes = Parser.Parse(lexRes);
             System.Console.WriteLine("\nFinieshed Parser parsing\nResult:\n");
             parseRes.Print();
+            var globalScope = new DiveableDictStack<string, Item>();
+            globalScope.Stack();
+            // TODO: Add cool shit to global
+            System.Console.WriteLine(Interpreter.Run(parseRes, globalScope));
         }
 
         return 0;
