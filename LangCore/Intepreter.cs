@@ -21,3 +21,12 @@ class Item
     public Type Type;
     public object Value;
 }
+
+class DiveableDictStack<TKey, TValue> : Dictionary<TKey, TValue> where TKey : notnull
+{
+    DiveableDictStack<TKey, TValue>? parent;
+
+    public void Stack() {
+        var res = new
+    }
+}
