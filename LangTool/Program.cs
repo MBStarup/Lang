@@ -32,7 +32,6 @@ public static class Program{
                 Type = typeof(LangFunc), 
                 Value = new LangFunc () {
                     Scope = globalScope,
-                    Name = "print_func",
                     ArgNames = new() {"x"}, 
                     Func = (DiveableDictStack<string, Item> s) => {
                         System.Console.Write(Encoding.ASCII.GetString(new byte[] { (byte)(int)s.Seek("x").Value }));
@@ -45,7 +44,6 @@ public static class Program{
                 Type = typeof(LangFunc), 
                 Value = new LangFunc () {
                     Scope = globalScope,
-                    Name = "if_func",
                     ArgNames = new() {"bool", "function"}, 
                     Func = (DiveableDictStack<string, Item> s) => {
                         if ((int)s.Seek("bool").Value == 1) {

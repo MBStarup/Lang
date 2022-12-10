@@ -7,7 +7,7 @@ public static class Interpreter
         {
             case "Func": 
                 {
-                    Item rsult = new() 
+                    return new() 
                     { 
                         Type = typeof(LangFunc), 
                         Value = new LangFunc() 
@@ -17,22 +17,16 @@ public static class Interpreter
                             Scope = scope.Copy<string, Item>()
                         }
                     };
-                    return rsult;
                 }
-                break;
 
             case "Assign":
                 {
                     if (expression.Values.Count != 1) throw new Exception($"Assignment expected one expression, found {expression.Values.Count}");
                     Item item = Run(expression.Values[0], scope);
-                    if (item.Type == typeof(LangFunc)) {
-                        (item.Value as LangFunc).Scope.Insert(expression.Identifiers[0], item); // Recursion
-                        (item.Value as LangFunc).Name = expression.Identifiers[0];
-                    }
+                    if (item.Type == typeof(LangFunc)) (item.Value as LangFunc).Scope.Insert(expression.Identifiers[0], item); // Recursion
                     scope.Insert(expression.Identifiers[0], item);
                     return item; //* Assigments evaluate to their assigned value
                 }
-                break;
             
             case "Int":
                 {
@@ -54,7 +48,6 @@ public static class Interpreter
                     if (val == null) throw new Exception($"Symbol with identifier {expression.Identifiers[0]} could not be found.");
                     return val;
                 }
-                break;
             
             case "Call":
                 {
@@ -76,7 +69,6 @@ public static class Interpreter
                     langFunc.Scope.Pop(); //* Remove function arguments scope before return
                     return val;
                 }
-                break;
             
             case "MultiExpr":
                 {
@@ -90,7 +82,6 @@ public static class Interpreter
                     scope.Pop();
                     return final;
                 }
-                break;
 
             case "BiExpr":
                 switch (expression.Identifiers[0])
@@ -184,11 +175,9 @@ public static class Interpreter
                         throw new Exception($"Unknown operator {expression.Identifiers[0]}");
                         break;
                 }
-                break;
 
             default:
                 throw new Exception("Uhmmmmm");
-                break;
         }
     }
 }
@@ -206,7 +195,6 @@ public class Item
 
 public class LangFunc 
 {
-    public string Name = "anon";
     public DiveableDictStack<string, Item> Scope;
     public Func<DiveableDictStack<string, Item>, Item> Func;
     public List<string> ArgNames;
