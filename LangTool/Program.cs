@@ -15,14 +15,20 @@ public static class Program{
 
         using (FileStream fs = new FileStream(args[0], FileMode.Open))
         {
+#if DEBUG
             System.Console.WriteLine("-------------------------------");
             System.Console.WriteLine("\nOpened File\n");
+#endif
             var lexRes = Lexer.Parse(fs);
+#if DEBUG
             System.Console.WriteLine("\nFinieshed Lexer parsing\nResult:\n");
             lexRes.Foreach(x => x.Print());
+#endif
             var parseRes = Parser.Parse(lexRes);
+#if DEBUG
             System.Console.WriteLine("\nFinieshed Parser parsing\nResult:\n");
             parseRes.Print();
+#endif
             var globalScope = new DiveableDictStack<string, Item>();
             globalScope.Stack();
 
@@ -42,10 +48,14 @@ public static class Program{
 
             //* End of magic functions provided to the language by the interpreter
 
+#if DEBUG
             System.Console.WriteLine("\n-----WELCOME-----\n");
+#endif
             var exitCode = (int)Interpreter.Run(parseRes, globalScope).Value;
+#if DEBUG
             System.Console.WriteLine("\n-------END-------\n");
             System.Console.WriteLine($"\n\nProgram finsished with exit code: {exitCode}");
+#endif
         }
 
         return 0;

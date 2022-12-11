@@ -53,7 +53,9 @@ public static class Lexer
                             comment += reader.ReadC();
                         }
                         comment += reader.ReadC();
+#if DEBUG
                         System.Console.WriteLine($" Comment: {comment} ");
+#endif
                         break;
                     } else if (Operators.Contains(c)) {
                         // System.Console.WriteLine(" Operator ");
