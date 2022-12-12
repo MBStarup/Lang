@@ -72,13 +72,13 @@ public static class Interpreter
             case "MultiExpr":
                 {
                     if (expression.Values.Count < 1) throw new Exception($"Empty MultiExpr");
-                    scope.Stack();
+                    //scope.Stack();
                     var final = Run(expression.Values[0], scope);
                     for (int i = 1; i < expression.Values.Count; i++)
                     {
                         final = Run(expression.Values[i], scope);
                     }
-                    scope.Pop();
+                    //scope.Pop();
                     return final;
                 }
 

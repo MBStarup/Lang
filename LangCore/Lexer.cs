@@ -18,7 +18,6 @@ public static class Lexer
 
         Queue<Token> queue = new();
         using (var reader = new StreamReader(file)) {
-            
             char c;
 
             while(!reader.EndOfStream) {
