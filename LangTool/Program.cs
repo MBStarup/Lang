@@ -12,6 +12,9 @@ public static class Program{
             System.Console.Error.WriteLine(UsageMessage);
             return 1;
         }
+#if !DEBUG
+try {
+#endif
 
         using (FileStream fs = new FileStream(args[0], FileMode.Open))
         {
@@ -51,12 +54,24 @@ public static class Program{
 #if DEBUG
             System.Console.WriteLine("\n-----WELCOME-----\n");
 #endif
-            var exitCode = (int)Interpreter.Run(parseRes, globalScope).Value;
-#if DEBUG
-            System.Console.WriteLine("\n-------END-------\n");
-            System.Console.WriteLine($"\n\nProgram finsished with exit code: {exitCode}");
-#endif
+            var result = Interpreter.Run(parseRes, globalScope).Value;
+            try {
+                var exitCode = (int)result;
+                #if DEBUG
+                System.Console.WriteLine("\n-------END-------\n");
+                System.Console.WriteLine($"\n\nProgram finsished with exit code: {exitCode}");
+                #endif
+            } catch {
+                throw new Exception("Bad exit code");
+            }
         }
+#if !DEBUG
+} catch (Exception e) {
+    Console.WriteLine($"\n ERROR: {e.Message}\n");
+    return 1;
+    //throw new Exception(e.Message); //Stack trace remover (it's not usefull, and quite annoying sometimes)
+}
+#endif
 
         return 0;
     }
