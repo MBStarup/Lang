@@ -2,7 +2,9 @@ namespace Lang.LangCore;
 
 public static class Interpreter
 {
-    public static Item Run(Expression expression, DiveableDictStack<string, Item> scope) {
+    public static int MaxCallDepth = 100;
+    public static bool PrintCallStack = true;
+    public static Item Run(Expression expression, DiveableDictStack<string, Item> scope, Stack<string> CallStack) {
         switch (expression.Type)
         {
             case "Func": 
@@ -13,7 +15,7 @@ public static class Interpreter
                         Value = new LangFunc() 
                         {
                             ArgNames = expression.Identifiers, 
-                            Func = scp => Run(expression.Values[0], scp), 
+                            Func = scp => Run(expression.Values[0], scp, CallStack), 
                             Scope = scope.Copy<string, Item>()
                         }
                     };
@@ -22,8 +24,12 @@ public static class Interpreter
             case "Assign":
                 {
                     if (expression.Values.Count != 1) throw new Exception($"Assignment expected one expression, found {expression.Values.Count}");
-                    Item item = Run(expression.Values[0], scope);
-                    if (item.Type == typeof(LangFunc)) (item.Value as LangFunc).Scope.Insert(expression.Identifiers[0], item); // Recursion
+                    Item item = Run(expression.Values[0], scope, CallStack);
+                    if (item.Type == typeof(LangFunc))  {
+                        var func = (LangFunc)item.Value;
+                        func.Scope.Insert(expression.Identifiers[0], item); // Recursion
+                        func.Name = expression.Identifiers[0];
+                    }
                     scope.Insert(expression.Identifiers[0], item);
                     return item; //* Assigments evaluate to their assigned value
                 }
@@ -54,17 +60,19 @@ public static class Interpreter
                     if (function == null) throw new Exception($"Symbol with identifier {expression.Identifiers[0]} could not be found.");
                     if (function.Type != typeof(LangFunc)) throw new Exception($"Can only call functions, tried to call {expression.Identifiers[0]}, which is a {function.Type}.");
                     var langFunc = (LangFunc)function.Value;
-                    
+                    if (CallStack.Count > MaxCallDepth) throw new Exception($"StackOverflow{(PrintCallStack ? $": {CallStack.Aggregate((x, y) => $"{x}\n{y}")}" : "")}");
                     
                     if (expression.Values.Count != langFunc.ArgNames.Count) throw new Exception($"Function {expression.Identifiers[0]} expected {langFunc.ArgNames.Count} arguments, but got {expression.Values.Count}");
                     
 
                     langFunc.Scope.Stack(); //* Add a new scope for the function arguments, and insert the arguments
+                    CallStack.Push($"Function {langFunc.Name}{(langFunc.ArgNames.Count > 0 ? $" with args: {langFunc.ArgNames.Aggregate((x, y) => $"{x}, {y}")}" : "")}");
                     for (int i = 0; i < langFunc.ArgNames.Count; i++)
                     {
-                        langFunc.Scope.Insert(langFunc.ArgNames[i], Run(expression.Values[i], scope) );
+                        langFunc.Scope.Insert(langFunc.ArgNames[i], Run(expression.Values[i], scope, CallStack) );
                     }
                     var val = langFunc.Func.Invoke(langFunc.Scope); //* Evaluate the function call
+                    CallStack.Pop();
                     langFunc.Scope.Pop(); //* Remove function arguments scope before return
                     return val;
                 }
@@ -73,10 +81,10 @@ public static class Interpreter
                 {
                     if (expression.Values.Count < 1) throw new Exception($"Empty MultiExpr");
                     //scope.Stack();
-                    var final = Run(expression.Values[0], scope);
+                    var final = Run(expression.Values[0], scope, CallStack);
                     for (int i = 1; i < expression.Values.Count; i++)
                     {
-                        final = Run(expression.Values[i], scope);
+                        final = Run(expression.Values[i], scope, CallStack);
                     }
                     //scope.Pop();
                     return final;
@@ -88,8 +96,8 @@ public static class Interpreter
                     case "+":
                         {
                             if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
-                            var a = Run(expression.Values[0], scope);
-                            var b = Run(expression.Values[1], scope);
+                            var a = Run(expression.Values[0], scope, CallStack);
+                            var b = Run(expression.Values[1], scope, CallStack);
 
                             if (a.Type != typeof(int)) throw new Exception($"Argument 1 of operator {expression.Identifiers[0]} must evaluate to a number");
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
@@ -99,8 +107,8 @@ public static class Interpreter
                     case "-":
                         {
                             if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
-                            var a = Run(expression.Values[0], scope);
-                            var b = Run(expression.Values[1], scope);
+                            var a = Run(expression.Values[0], scope, CallStack);
+                            var b = Run(expression.Values[1], scope, CallStack);
 
                             if (a.Type != typeof(int)) throw new Exception($"Argument 1 of operator {expression.Identifiers[0]} must evaluate to a number");
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
@@ -110,8 +118,8 @@ public static class Interpreter
                     case "*":
                         {
                             if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
-                            var a = Run(expression.Values[0], scope);
-                            var b = Run(expression.Values[1], scope);
+                            var a = Run(expression.Values[0], scope, CallStack);
+                            var b = Run(expression.Values[1], scope, CallStack);
 
                             if (a.Type != typeof(int)) throw new Exception($"Argument 1 of operator {expression.Identifiers[0]} must evaluate to a number");
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
@@ -121,8 +129,8 @@ public static class Interpreter
                     case "/":
                         {
                             if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
-                            var a = Run(expression.Values[0], scope);
-                            var b = Run(expression.Values[1], scope);
+                            var a = Run(expression.Values[0], scope, CallStack);
+                            var b = Run(expression.Values[1], scope, CallStack);
 
                             if (a.Type != typeof(int)) throw new Exception($"Argument 1 of operator {expression.Identifiers[0]} must evaluate to a number");
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
@@ -132,8 +140,8 @@ public static class Interpreter
                     case ">":
                         {
                             if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
-                            var a = Run(expression.Values[0], scope);
-                            var b = Run(expression.Values[1], scope);
+                            var a = Run(expression.Values[0], scope, CallStack);
+                            var b = Run(expression.Values[1], scope, CallStack);
 
                             if (a.Type != typeof(int)) throw new Exception($"Argument 1 of operator {expression.Identifiers[0]} must evaluate to a number");
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
@@ -143,8 +151,8 @@ public static class Interpreter
                     case "<":
                         {
                             if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
-                            var a = Run(expression.Values[0], scope);
-                            var b = Run(expression.Values[1], scope);
+                            var a = Run(expression.Values[0], scope, CallStack);
+                            var b = Run(expression.Values[1], scope, CallStack);
 
                             if (a.Type != typeof(int)) throw new Exception($"Argument 1 of operator {expression.Identifiers[0]} must evaluate to a number");
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
@@ -154,8 +162,8 @@ public static class Interpreter
                     case "=":
                         {
                             if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
-                            var a = Run(expression.Values[0], scope);
-                            var b = Run(expression.Values[1], scope);
+                            var a = Run(expression.Values[0], scope, CallStack);
+                            var b = Run(expression.Values[1], scope, CallStack);
 
                             if (a.Type != typeof(int)) throw new Exception($"Argument 1 of operator {expression.Identifiers[0]} must evaluate to a number");
                             if (b.Type != typeof(int)) throw new Exception($"Argument 2 of operator {expression.Identifiers[0]} must evaluate to a number");
@@ -165,13 +173,13 @@ public static class Interpreter
                     case "&":
                         {
                             if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
-                            return new Item(){Type = typeof(int), Value = ((int)(Run(expression.Values[0], scope)).Value == 1) && ((int)(Run(expression.Values[1], scope)).Value == 1) ? 1 : 0}; //* Automatically has shortcircuit eval since c# does
+                            return new Item(){Type = typeof(int), Value = ((int)(Run(expression.Values[0], scope, CallStack)).Value == 1) && ((int)(Run(expression.Values[1], scope, CallStack)).Value == 1) ? 1 : 0}; //* Automatically has shortcircuit eval since c# does
                         }
                     
                     case "|":
                         {
                             if (expression.Values.Count != 2) throw new Exception($"Operator {expression.Identifiers[0]} expected 2 arguments, but got {expression.Values.Count}");
-                            return new Item(){Type = typeof(int), Value = ((int)(Run(expression.Values[0], scope)).Value == 1) || ((int)(Run(expression.Values[1], scope)).Value == 1) ? 1 : 0}; //* Automatically has shortcircuit eval since c# does
+                            return new Item(){Type = typeof(int), Value = ((int)(Run(expression.Values[0], scope, CallStack)).Value == 1) || ((int)(Run(expression.Values[1], scope, CallStack)).Value == 1) ? 1 : 0}; //* Automatically has shortcircuit eval since c# does
                         }
 
                     default:
@@ -197,6 +205,7 @@ public class Item
 
 public class LangFunc 
 {
+    public String Name = "anon";
     public DiveableDictStack<string, Item> Scope;
     public Func<DiveableDictStack<string, Item>, Item> Func;
     public List<string> ArgNames;

@@ -54,7 +54,7 @@ try {
 #if DEBUG
             System.Console.WriteLine("\n-----WELCOME-----\n");
 #endif
-            var result = Interpreter.Run(parseRes, globalScope).Value;
+            var result = Interpreter.Run(parseRes, globalScope, new()).Value;
             try {
                 var exitCode = (int)result;
                 #if DEBUG
