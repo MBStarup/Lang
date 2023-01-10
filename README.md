@@ -28,11 +28,13 @@ Numbers
 12378912309
 
 Math operators (no precedence)
-2 + 4 * 8
+2 + 4
+3 * 8
 1 - 3 / 4
 
 Logic operators (no precedence)
 0 & 0 | 1
+1 = 1
 ```
 
 The "print()" function is "injected" from the C# runtime
